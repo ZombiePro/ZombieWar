@@ -3,14 +3,14 @@
  */
 
 var collections = {accounts: "accounts"}
-var methods = {insert: insert, save: save, findOne: findOne, find: find}
+var methods = {insert: insert, save: save, findOne: findOne, find: find, findAndModify: findAndModify, update: update}
 
 var log = require("winston").loggers.get("app:mongoCtrl");
 var mongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var conn = null;
 
-function execute(method, col, doc, cb) {
+function execute(method, col, criteria, doc, cb) {
     getConnection(function(err){
         if (err) cb(err, null);
         switch(method) {
@@ -18,6 +18,8 @@ function execute(method, col, doc, cb) {
             case methods.findOne: findOne(col, doc, cb); break;
             case methods.insert: insert(col, doc, cb); break;
             case methods.save: save(col, doc, cb); break;
+            case methods.update: update(col, criteria, doc, cb); break;
+            case methods.findAndModify: findAndModify(col, criteria, doc, cb); break;
         }
     })
 }
@@ -51,7 +53,7 @@ function getConnection(callback) {
 }
 
 function insert(col, doc, cb) {
-    log.debug("going to upsert: " + doc + " to " + col);
+    log.debug("going to findAndModify: " + doc + " to " + col);
     var collection = conn.collection(col);
     collection.insert(doc, function(err, docs) {
         if (err) cb(err, null);
@@ -71,6 +73,28 @@ function save(col, doc, cb) {
         cb(null, docs); // return an int - the number of documents changed
     });
 };
+
+function findAndModify(col, criteria, doc, cb) {
+    log.debug("going to findAndModify: ", doc, " to ", col);
+    var collection = conn.collection(col);
+    collection.findAndModify(criteria, doc, {new: true, upsert: false}, function(err, docs) {
+        if (err) cb(err, null);
+        log.info("collection:", col, "findAndModify successful");
+        log.debug("document found and modified: ", JSON.stringify(docs, null, 4));
+        cb(null, docs); // return an int - the number of documents changed
+    });
+};
+
+function update(col, criteria, doc, cb) {
+    log.debug("going to increment: ", doc, " to ", col);
+    var collection = conn.collection(col);
+    collection.update(criteria, doc, {upsert: false}, function(err, docs) {
+        if (err) cb(err, null);
+        log.info("collection:", col, "update successful");
+        log.debug("document updated: ", JSON.stringify(docs, null, 4));
+        cb(null, docs); // return an int - the number of documents changed
+    });
+}
 
 function findOne(col, doc, cb) {
     log.debug("going to findOne: ", doc, " in ", col);
