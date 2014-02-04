@@ -2,7 +2,8 @@
  * Created by tomasj on 28/01/14.
  */
 var config =  require('./config');
-var log = require("winston").loggers.get("app:server");
+var winston = require("winston");
+winston.add(winston.transports.File, {filename: '../app.log', level: 'debug'}).remove(winston.transports.Console);
 var express = require('express');
 var app = express();
 
@@ -20,9 +21,9 @@ app.use(app.router);
 
 app.listen(config.express.port, config.express.ip, function (error) {
   if (error) {
-    log.error("Unable to listen for connections", error);
+    winston.error("Unable to listen for connections", error);
     process.exit(10);
   }
-  log.info("express is listening on http://" +
+  winston.info("express is listening on http://" +
     config.express.ip + ":" + config.express.port);
 });
