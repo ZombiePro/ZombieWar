@@ -2,13 +2,14 @@
  * Created by tomasj on 29/01/14.
  */
 
-var log = require("winston").loggers.get("app:users");
+var winston = require("winston");
+//winston.add(winston.transports.File, {filename: '../app.log', level: 'debug'}).remove(winston.transports.Console);
 var mongo = require('./mongoCtrl');
 var ObjectId = require('mongodb').ObjectID;
 var express = require('express');
 
 function createUser(req, res) {
-    log.debug("createUser request: ", req.body);
+    winston.debug("%s: %j", "createUser request, body:", req.body, {});
     var doc = {};
     doc.email = "email" in req.body ? req.body.email : res.send(400, "Please specify an email");
     doc.nick = req.body.nick || "";
@@ -21,14 +22,14 @@ function createUser(req, res) {
     mongo.execute(mongo.methods.insert, mongo.collections.accounts, null, doc, function(err, data) {
         if (err) throw err;
         res.set("Content-Type", "application/json");
-        // as insert returns a cursor object (an array more or less) so we have to user data[0] to access the result
+        // as insert returns a cursor object (an array more or less) so we have to use data[0] to access the result
         res.send(201, {id: data[0]._id, email: data[0].email});
     });
 }
 
 // should be internal - not even sure it should exist :P
 function getUsers(req, res) {
-    log.debug("getUsers request: ", req.params);
+    winston.debug("%s: %j", "getUsers request, params", req.params, {});
     mongo.execute(mongo.methods.find, mongo.collections.accounts, null, {}, function(err, data){
         if (err) throw err;
         res.set("Content-Type", "application/json");
@@ -37,7 +38,7 @@ function getUsers(req, res) {
 }
 
 function getUser(req, res) {
-    log.debug("getUser request: ", req.params);
+    winston.debug("%s: %j", "getUser request, params", req.params, {});
     var doc = {_id: ObjectId(req.params.id)}
     mongo.execute(mongo.methods.findOne, mongo.collections.accounts, null, doc, function(err, data) {
         if (err) throw err;
@@ -47,7 +48,7 @@ function getUser(req, res) {
 }
 
 function getUserFriends(req, res) {
-    log.debug("getUserFriends request: ", req.params);
+    winston.debug("%s: %j", "getUserFriends request, params", req.params, {});
     var doc = {_id: ObjectId(req.params.id)}
     mongo.execute(mongo.methods.findOne, mongo.collections.accounts, null, doc, function(err, data) {
         if (err) throw err;
@@ -57,7 +58,7 @@ function getUserFriends(req, res) {
 }
 
 function modifyUser(req, res) {
-    log.debug("modifyUser request: ", req.body);
+    winston.debug("%s: %j, %s: %j", "modifyUsers request, param", req.params, "body", req.body, {});
     if (req.body == {}) {
         res.set("Content-Type", "application/json");
         res.send(400, {error: "parameter missing", message: "specify at least one parameter to be changed"});
@@ -79,7 +80,7 @@ function modifyUser(req, res) {
 }
 
 function addFriends(req, res) {
-    log.debug("addFriends request: ", req.body)
+    winston.debug("%s: %j, %s: %j", "modifyUsers request, params", req.params, "body", req.body, {});
     if ("friends" in req.body) {
         var userFriends = {$addToSet : { friends: { $each: req.body.friends}}};
         mongo.execute(mongo.methods.update, mongo.collections.accounts, {_id: ObjectId(req.params.id)}, userFriends, function(err, data) {
