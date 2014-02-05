@@ -11,9 +11,12 @@ function createUser(req, res) {
     log.debug("createUser request: ", req.body);
     var doc = {};
     doc.email = "email" in req.body ? req.body.email : res.send(400, "Please specify an email");
-    doc.nick = "nick" in req.body ? req.body.nick : "";
-    doc.details = "details" in req.body ? req.body.details : {name: "", surname: "", gender: "", age: ""};
-    doc.friends = "friends" in req.body ? req.body.friends : new Array();
+    doc.nick = req.body.nick || "";
+    doc.name = req.body.name || "";
+    doc.surname = req.body.surname || "";
+    doc.gender = req.body.gender || "Male";
+    doc.age = req.body.age || 100;
+    doc.friends = req.body.friends || new Array();
     doc.photoId = ObjectId("newObjectId1");
     mongo.execute(mongo.methods.insert, mongo.collections.accounts, null, doc, function(err, data) {
         if (err) throw err;
@@ -55,11 +58,18 @@ function getUserFriends(req, res) {
 
 function modifyUser(req, res) {
     log.debug("modifyUser request: ", req.body);
-    var userData = {};
-    if ("email" in req.body) userData.email =  req.body.email;
-    if ("nick" in req.body) userData.nick =  req.body.nick;
-    if ("details" in req.body) userData.details =  req.body.details;
-    if (userData != {}) {
+    if (req.body == {}) {
+        res.set("Content-Type", "application/json");
+        res.send(400, {error: "parameter missing", message: "specify at least one parameter to be changed"});
+    }
+    else {
+        var userData = {};
+        if ("email" in req.body) userData.email =  req.body.email;
+        if ("nick" in req.body) userData.nick =  req.body.nick;
+        if ("name" in req.body) userData.name =  req.body.name;
+        if ("surname" in req.body) userData.surname =  req.body.surname;
+        if ("gender" in req.body) userData.gender =  req.body.gender;
+        if ("age" in req.body) userData.age =  req.body.age;
         mongo.execute(mongo.methods.update, mongo.collections.accounts, {_id: ObjectId(req.params.id)}, {$set: userData}, function(err, data) {
             if (err) throw err;
             res.set("Content-Type", "application/json");
@@ -72,13 +82,11 @@ function addFriends(req, res) {
     log.debug("addFriends request: ", req.body)
     if ("friends" in req.body) {
         var userFriends = {$addToSet : { friends: { $each: req.body.friends}}};
-        if (userFriends != {}) {
-            mongo.execute(mongo.methods.update, mongo.collections.accounts, {_id: ObjectId(req.params.id)}, userFriends, function(err, data) {
-                if (err) throw err;
-                res.set("Content-Type", "application/json");
-                res.send(204, {});
-            });
-        }
+        mongo.execute(mongo.methods.update, mongo.collections.accounts, {_id: ObjectId(req.params.id)}, userFriends, function(err, data) {
+            if (err) throw err;
+            res.set("Content-Type", "application/json");
+            res.send(204, {});
+        });
     }
     else {
         res.set("Content-Type", "application/json");
