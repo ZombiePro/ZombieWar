@@ -5,6 +5,7 @@
 var collections = {accounts: "accounts"}
 var methods = {insert: insert, save: save, findOne: findOne, find: find, findAndModify: findAndModify, update: update}
 
+var config = require('../config');
 var winston = require("winston");
 var mongoClient = require('mongodb').MongoClient;
 var async = require('async');
@@ -40,9 +41,20 @@ function getConnection(callback) {
         function (call) {
             mongoClient.connect("mongodb://127.0.0.1:27017/zombiewar", function(err, db) {
                 if (err) throw err;
-                conn = db;
-                winston.info("DB connection established");
-                return callback(null);
+                if (config.mongodb.auth) {
+                    db.authenticate(config.mongodb.user, config.mongodb.pass, function(err, result) {
+                        if (err) throw err;
+                        conn = db;
+                        winston.info("DB connection established with auth");
+                        return callback(null);
+                    })
+                }
+                else {
+                    conn = db;
+                    winston.info("DB connection established");
+                    return callback(null);
+                }
+
             })
             setTimeout(call, 1000);
         },
