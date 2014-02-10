@@ -10,7 +10,7 @@ var mongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var conn = null;
 
-function execute(method, col, criteria, doc, cb) {
+function execute(method, col, criteria, doc, options, cb) {
     getConnection(function(err){
         if (err) cb(err, null);
         switch(method) {
@@ -18,7 +18,7 @@ function execute(method, col, criteria, doc, cb) {
             case methods.findOne: findOne(col, doc, cb); break;
             case methods.insert: insert(col, doc, cb); break;
             case methods.save: save(col, doc, cb); break;
-            case methods.update: update(col, criteria, doc, cb); break;
+            case methods.update: update(col, criteria, doc, options, cb); break;
             case methods.findAndModify: findAndModify(col, criteria, doc, cb); break;
         }
     })
@@ -85,10 +85,10 @@ function findAndModify(col, criteria, doc, cb) {
     });
 };
 
-function update(col, criteria, doc, cb) {
+function update(col, criteria, doc, options, cb) {
     winston.debug("%s %j %s %s", "going to update:", doc, "to", col, {});
     var collection = conn.collection(col);
-    collection.update(criteria, doc, {upsert: false}, function(err, docs) {
+    collection.update(criteria, doc, options, function(err, docs) {
         if (err) cb(err, null);
         winston.info("%s '%s': %s", "collection", col, "update successful", {});
         winston.debug("%s: %j", "document updated", docs, {});
