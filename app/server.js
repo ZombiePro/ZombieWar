@@ -9,7 +9,7 @@ var app = express();
 
 //var AUTOUSING_THE_ROUTER_IS_A_NUISANCE = app.router;
 //Load the routes ("controllers" -ish)
-["./users/routes"].forEach(function (routePath) {
+["./users/routes", './web/routes'].forEach(function (routePath) {
     require(routePath)(app);
 });
 
