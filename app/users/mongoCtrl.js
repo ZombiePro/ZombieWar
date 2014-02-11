@@ -39,7 +39,7 @@ function getConnection(callback) {
             return conn == null;
         },
         function (call) {
-            mongoClient.connect("mongodb://127.0.0.1:27017/zombiewar", function(err, db) {
+            mongoClient.connect("mongodb://" + config.mongodb.host + ":" + config.mongodb.port + "/zombiewar", function(err, db) {
                 if (err) throw err;
                 if (config.mongodb.auth) {
                     db.authenticate(config.mongodb.user, config.mongodb.pass, function(err, result) {
