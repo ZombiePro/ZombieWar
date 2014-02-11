@@ -18,15 +18,15 @@ config.mongodb = {
 if (PRODUCTION) {
     config.express = {
       port: process.env.EXPRESS_PORT || 3000,
-      ip: "195.77.85.49"
+      ip: process.env.EXPRESS_IP || "localhost"
     };
 
     config.mongodb = {
       port: process.env.MONGODB_PORT || 27017,
       host: process.env.MONGODB_HOST || 'localhost',
-      auth: true,
-      user: 'admin',
-      pass: process.env.MONGODB_PASS || ';(VeAqTR^p'
+      auth: false,
+      user: process.env.MONGODB_USER || 'admin',
+      pass: process.env.MONGODB_PASS || 'holapapi'
     };
 }
 //config.db same deal
