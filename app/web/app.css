@@ -24,3 +24,17 @@ h1 {
 	width: 100%;
 	height: 100%;
 }
+
+#fps{
+	position: absolute;
+	top: 0;
+	right: 0;
+	color: lime;
+	z-index: 99999;
+	padding: 4px;
+}
+
+#fps:before {
+	color: green;
+	content: 'FPS: ';
+}
