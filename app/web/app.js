@@ -82,7 +82,7 @@ function ZombieWarGame(canvas) {
 		m: 300,
 		o: 0,
 	};
-
+	var keyboard = this.keyboard = {};
 	var zombie = this.zombie = new Zombie();
 	var point = this.point = new Point();
 
@@ -90,45 +90,56 @@ function ZombieWarGame(canvas) {
 
 	window.addEventListener('keydown', function(e) {
 		var kc = e.keyCode;
-		console.log(kc);
 		switch (kc) {
 			case 37: // Left
-				point.position.x -= 10;
-				zombie.position.x -= 10;
+				keyboard.left = true;
 				break;
 			case 39: // Right
-				point.position.x += 10;
-				zombie.position.x += 10;
+				keyboard.right = true;
 				break;
 			case 38: // Up
-				point.position.y += 10;
-				zombie.position.y += 10;
+				keyboard.up = true;
 				break;
 			case 40: // Down
-				point.position.y -= 10;
-				zombie.position.y -= 10;
+				keyboard.down = true;
 				break;
-			case 49: // 1
-				perspective.h += 1;
+			// case 49: // 1
+			// 	perspective.h += 1;
+			// 	break;
+			// case 81: // Q
+			// 	perspective.h -= 1;
+			// 	break;
+			// case 50: // 2
+			// 	perspective.m += 1;
+			// 	break;
+			// case 87: // W
+			// 	perspective.m -= 1;
+			// 	break;
+			// case 51: // 3
+			// 	perspective.o += 1;
+			// 	break;
+			// case 69: // E
+			// 	perspective.o -= 1;
+			// 	break;
+		}
+	}, true);
+
+	window.addEventListener('keyup', function(e) {
+		var kc = e.keyCode;
+		switch (kc) {
+			case 37: // Left
+				keyboard.left = false;
 				break;
-			case 81: // Q
-				perspective.h -= 1;
+			case 39: // Right
+				keyboard.right = false;
 				break;
-			case 50: // 2
-				perspective.m += 1;
+			case 38: // Up
+				keyboard.up = false;
 				break;
-			case 87: // W
-				perspective.m -= 1;
-				break;
-			case 51: // 3
-				perspective.o += 1;
-				break;
-			case 69: // E
-				perspective.o -= 1;
+			case 40: // Down
+				keyboard.down = false;
 				break;
 		}
-
-		console.log(zombie.position);
 	}, true);
 
 }
@@ -137,8 +148,18 @@ ZombieWarGame.prototype.init = function() {
 	
 };
 
+ZombieWarGame.prototype.processKeyboard = function() {
+	if (this.keyboard.left) this.zombie.position.x -= 10;
+	if (this.keyboard.right) this.zombie.position.x += 10;
+
+	if (this.keyboard.down) this.zombie.position.y -= 10;
+	if (this.keyboard.up) this.zombie.position.y += 10;
+};
+
 ZombieWarGame.prototype.tick = function() {
 	this.ticks++;
+
+	this.processKeyboard();
 
 	this.drawBackground();
 	this.drawZombie();
