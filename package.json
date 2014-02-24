@@ -28,6 +28,8 @@
     "winston": "~0.7.2"
   },
   "devDependencies": {
-    "mocha": "~1.13.0"
+    "mocha": "~1.13.0",
+    "chai": "~1.9.0",
+    "tdaf-node-tartare": "git+ssh://git@pdihub.hi.inet:TDAF/tdaf-node-tartare.git#develop"
   }
 }
